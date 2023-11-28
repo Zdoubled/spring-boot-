@@ -34,7 +34,7 @@ public class DBRouterStrategy implements IDBRouterStrategy {
 
     @Override
     public void setTBKey(int tbIdx) {
-        DBContextHolder.setDbKey(String.format("%03d",tbIdx));
+        DBContextHolder.setTbKey(String.format("%03d",tbIdx));
     }
 
     @Override

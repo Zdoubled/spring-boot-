@@ -8,12 +8,15 @@ import com.zdouble.dbrouter.strategy.IDBRouterStrategy;
 import com.zdouble.dbrouter.strategy.strategyImp.DBRouterStrategy;
 import com.zdouble.dbrouter.util.PropertyUtil;
 import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.transaction.Transaction;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -68,11 +71,22 @@ public class DataSourceAutoConfig implements EnvironmentAware {
         ));
         return dynamicDataSource;
     }
+    @Bean
+    public TransactionTemplate transactionTemplate(DataSource dataSource){
+        DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
+
+        dataSourceTransactionManager.setDataSource(dataSource);
+        TransactionTemplate transactionTemplate = new TransactionTemplate();
+        transactionTemplate.setTransactionManager(dataSourceTransactionManager);
+        transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRED");
+
+        return transactionTemplate;
+    }
 
     @Override
     public void setEnvironment(Environment environment) {
         //读取yml文件的数据源信息
-        String prefix = "";
+        String prefix = "zdouble-db-router.jdbc.datasource.";
         //获取库表数量
         dbCount = Integer.valueOf(environment.getProperty(prefix + "dbCount"));
         tbCount = Integer.valueOf(environment.getProperty(prefix + "tbCount"));
